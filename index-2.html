@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="ProspectHub - Gestion de prospection web">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ProspectHub">
+    <title>ProspectHub</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        html, body, #root {
+            width: 100%;
+            height: 100%;
+        }
+        
+        input, textarea {
+            font-size: 16px;
+            border-radius: 0.5rem;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        button {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+            border-radius: 3px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 12px;
+        }
+        
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(4px);
+            border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+            padding: 12px 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header-content {
+            padding: 12px 0;
+        }
+        
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 8px;
+        }
+        
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+        
+        .header-title p {
+            font-size: 11px;
+            color: #94a3b8;
+            margin: 2px 0 0 0;
+        }
+        
+        .btn-new {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(to right, #3b82f6, #06b6d4);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-new:hover {
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 28px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+        }
+        
+        .search-box input::placeholder {
+            color: #64748b;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            width: 16px;
+            height: 16px;
+            color: #64748b;
+        }
+        
+        .main-content {
+            padding: 16px 0 80px 0;
+        }
+        
+        .prospect-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .prospect-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .prospect-header {
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .prospect-header:hover {
+            background-color: rgba(51, 65, 85, 0.3);
+        }
+        
+        .prospect-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .prospect-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            word-break: break-word;
+        }
+        
+        .prospect-contact {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 2px;
+            word-break: break-word;
+        }
+        
+        .badges {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(3, 102, 214, 0.2);
+            color: #93c5fd;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 999px;
+        }
+        
+        .prospect-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        .btn-icon {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-icon:hover {
+            background-color: #334155;
+        }
+        
+        .btn-icon.delete:hover {
+            color: #ef4444;
+        }
+        
+        .btn-icon.edit:hover {
+            color: #60a5fa;
+        }
+        
+        .prospect-details {
+            border-top: 1px solid #334155;
+            background: #0f172a;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .detail-item {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .detail-icon {
+            color: #06b6d4;
+            flex-shrink: 0;
+        }
+        
+        .detail-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .detail-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+        
+        .detail-value {
+            color: white;
+            font-size: 13px;
+            word-break: break-all;
+        }
+        
+        .detail-value a {
+            color: #06b6d4;
+            text-decoration: none;
+        }
+        
+        .form-container {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .form-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: white;
+            font-size: 13px;
+        }
+        
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: #64748b;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+        }
+        
+        .form-textarea {
+            resize: none;
+            min-height: 80px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .checkbox-label input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .btn-primary {
+            flex: 1;
+            background: linear-gradient(to right, #3b82f6, #06b6d4);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .btn-secondary {
+            padding: 10px 16px;
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            margin: 8px 0;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0f172a;
+            border-top: 1px solid #334155;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .exchanges-section {
+            border-top: 1px solid #334155;
+            padding-top: 12px;
+        }
+        
+        .exchanges-title {
+            font-weight: 600;
+            color: white;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        
+        .exchanges-list {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            padding: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .exchange-item {
+            background: rgba(71, 85, 105, 0.3);
+            border-left: 2px solid #06b6d4;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 6px;
+            color: white;
+        }
+        
+        .exchange-text {
+            word-break: break-word;
+            margin-bottom: 4px;
+        }
+        
+        .exchange-time {
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .exchange-input {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .exchange-input input {
+            flex: 1;
+            padding: 6px 8px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .exchange-input button {
+            background: linear-gradient(to right, #06b6d4, #3b82f6);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script>
+        const app = {
+            prospects: [],
+            showForm: false,
+            editingId: null,
+            expandedId: null,
+            searchTerm: '',
+            newMessage: '',
+            formData: {
+                company: '',
+                contact: '',
+                email: '',
+                phone: '',
+                address: '',
+                hasWebsite: false,
+                hasFacebook: false,
+                notes: ''
+            },
+            
+            init() {
+                this.loadData();
+                this.render();
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('sw.js').catch(() => {});
+                }
+            },
+            
+            loadData() {
+                const saved = localStorage.getItem('prospectHub_prospects');
+                if (saved) {
+                    try {
+                        this.prospects = JSON.parse(saved);
+                    } catch (e) {}
+                }
+            },
+            
+            saveData() {
+                localStorage.setItem('prospectHub_prospects', JSON.stringify(this.prospects));
+            },
+            
+            addProspect() {
+                if (!this.formData.company.trim()) return;
+                
+                const prospect = {
+                    id: Date.now(),
+                    ...this.formData,
+                    createdAt: new Date().toLocaleDateString('fr-FR'),
+                    messages: []
+                };
+                
+                this.prospects.push(prospect);
+                this.saveData();
+                this.resetForm();
+                this.render();
+            },
+            
+            deleteProspect(id) {
+                if (confirm('Supprimer ce prospect ?')) {
+                    this.prospects = this.prospects.filter(p => p.id !== id);
+                    this.saveData();
+                    if (this.expandedId === id) this.expandedId = null;
+                    this.render();
+                }
+            },
+            
+            updateProspect(id) {
+                this.prospects = this.prospects.map(p => 
+                    p.id === id ? { ...p, ...this.formData } : p
+                );
+                this.saveData();
+                this.resetForm();
+                this.editingId = null;
+                this.render();
+            },
+            
+            addMessage(id, text) {
+                if (!text.trim()) return;
+                
+                this.prospects = this.prospects.map(p => {
+                    if (p.id === id) {
+                        return {
+                            ...p,
+                            messages: [...(p.messages || []), {
+                                id: Date.now(),
+                                text: text,
+                                date: new Date().toLocaleDateString('fr-FR'),
+                                time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                            }]
+                        };
+                    }
+                    return p;
+                });
+                
+                this.saveData();
+                this.render();
+            },
+            
+            resetForm() {
+                this.formData = {
+                    company: '',
+                    contact: '',
+                    email: '',
+                    phone: '',
+                    address: '',
+                    hasWebsite: false,
+                    hasFacebook: false,
+                    notes: ''
+                };
+                this.showForm = false;
+            },
+            
+            startEdit(prospect) {
+                this.editingId = prospect.id;
+                this.expandedId = prospect.id;
+                this.formData = JSON.parse(JSON.stringify(prospect));
+                this.render();
+            },
+            
+            getFilteredProspects() {
+                return this.prospects.filter(p =>
+                    p.company.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                    p.contact.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                    p.email.toLowerCase().includes(this.searchTerm.toLowerCase())
+                );
+            },
+            
+            render() {
+                const root = document.getElementById('root');
+                const filtered = this.getFilteredProspects();
+                
+                root.innerHTML = `
+                    <div style="min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);">
+                        <div class="header">
+                            <div class="container">
+                                <div class="header-content">
+                                    <div class="header-top">
+                                        <div class="header-title">
+                                            <h1>ProspectHub</h1>
+                                            <p>Prospection mobile</p>
+                                        </div>
+                                        <button class="btn-new" onclick="app.showForm = !app.showForm; app.editingId = null; app.render();">+ Nouveau</button>
+                                    </div>
+                                    <div class="search-box">
+                                        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <path d="m21 21-4.35-4.35"></path>
+                                        </svg>
+                                        <input type="text" placeholder="Chercher..." value="${this.searchTerm}" 
+                                            onkeyup="app.searchTerm = this.value; app.render();">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="main-content">
+                            <div class="container">
+                                ${this.showForm ? this.renderForm() : ''}
+                                ${this.editingId ? this.renderEditForm() : ''}
+                                
+                                <div class="prospect-list">
+                                    ${filtered.length === 0 ? `
+                                        <div class="empty-state">
+                                            <p>Aucun prospect</p>
+                                            <p style="font-size: 12px;">Commencez par en ajouter un</p>
+                                        </div>
+                                    ` : filtered.map(p => this.renderProspectCard(p)).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>${filtered.length} prospect${filtered.length !== 1 ? 's' : ''}</p>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            renderForm() {
+                return `
+                    <div class="form-container">
+                        <div class="form-title">Nouveau prospect</div>
+                        <div class="form-group">
+                            <input class="form-input" type="text" placeholder="Entreprise *" value="${this.formData.company}" 
+                                oninput="app.formData.company = this.value;">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-input" type="text" placeholder="Contact" value="${this.formData.contact}" 
+                                oninput="app.formData.contact = this.value;">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-input" type="email" placeholder="Email" value="${this.formData.email}" 
+                                oninput="app.formData.email = this.value;">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-input" type="tel" placeholder="Téléphone" value="${this.formData.phone}" 
+                                oninput="app.formData.phone = this.value;">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-input" type="text" placeholder="Adresse" value="${this.formData.address}" 
+                                oninput="app.formData.address = this.value;">
+                        </div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" ${this.formData.hasWebsite ? 'checked' : ''} 
+                                    onchange="app.formData.hasWebsite = this.checked;">
+                                Site web
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" ${this.formData.hasFacebook ? 'checked' : ''} 
+                                    onchange="app.formData.hasFacebook = this.checked;">
+                                Facebook
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-textarea" placeholder="Notes" oninput="app.formData.notes = this.value;">${this.formData.notes}</textarea>
+                        </div>
+                        <div class="form-buttons">
+                            <button class="btn-primary" onclick="app.addProspect();">Ajouter</button>
+                            <button class="btn-secondary" onclick="app.showForm = false; app.render();">Annuler</button>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            renderEditForm() {
+                return `
+                    <div class="form-container">
+                        <div class="form-title">Éditer</div>
+                        <div class="form-group">
+                            <input class="form-input" type="text" value="${this.formData.company}" 
+                                oninput="app.formData.company = this.value;">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-input" type="text" value="${this.formData.contact}" 
+                                oninput="app.formData.contact = this.value;">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-input" type="email" value="${this.formData.email}" 
+                                oninput="app.formData.email = this.value;">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-input" type="tel" value="${this.formData.phone}" 
+                                oninput="app.formData.phone = this.value;">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-input" type="text" value="${this.formData.address}" 
+                                oninput="app.formData.address = this.value;">
+                        </div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" ${this.formData.hasWebsite ? 'checked' : ''} 
+                                    onchange="app.formData.hasWebsite = this.checked;">
+                                Site web
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" ${this.formData.hasFacebook ? 'checked' : ''} 
+                                    onchange="app.formData.hasFacebook = this.checked;">
+                                Facebook
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-textarea" oninput="app.formData.notes = this.value;">${this.formData.notes}</textarea>
+                        </div>
+                        <div class="form-buttons">
+                            <button class="btn-primary" onclick="app.updateProspect(${this.editingId});">Enregistrer</button>
+                            <button class="btn-secondary" onclick="app.editingId = null; app.resetForm(); app.render();">Annuler</button>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            renderProspectCard(prospect) {
+                const isExpanded = this.expandedId === prospect.id;
+                
+                return `
+                    <div class="prospect-card">
+                        <div class="prospect-header" onclick="app.expandedId = app.expandedId === ${prospect.id} ? null : ${prospect.id}; app.render();">
+                            <div class="prospect-info">
+                                <div class="prospect-name">${prospect.company}</div>
+                                ${prospect.contact ? `<div class="prospect-contact">${prospect.contact}</div>` : ''}
+                                <div class="badges">
+                                    ${prospect.hasWebsite ? '<span class="badge">🌐 Web</span>' : ''}
+                                    ${prospect.hasFacebook ? '<span class="badge">📘 FB</span>' : ''}
+                                </div>
+                            </div>
+                            <div class="prospect-actions">
+                                <button class="btn-icon edit" onclick="event.stopPropagation(); app.startEdit(${JSON.stringify(prospect).replace(/"/g, '&quot;')});" title="Éditer">✏️</button>
+                                <button class="btn-icon delete" onclick="event.stopPropagation(); app.deleteProspect(${prospect.id});" title="Supprimer">🗑️</button>
+                                <button class="btn-icon" onclick="event.stopPropagation();" title="Détails">${isExpanded ? '▲' : '▼'}</button>
+                            </div>
+                        </div>
+                        ${isExpanded ? `
+                            <div class="prospect-details">
+                                ${prospect.email ? `
+                                    <div class="detail-item">
+                                        <div class="detail-icon">✉️</div>
+                                        <div class="detail-content">
+                                            <div class="detail-label">Email</div>
+                                            <div class="detail-value"><a href="mailto:${prospect.email}">${prospect.email}</a></div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${prospect.phone ? `
+                                    <div class="detail-item">
+                                        <div class="detail-icon">☎️</div>
+                                        <div class="detail-content">
+                                            <div class="detail-label">Téléphone</div>
+                                            <div class="detail-value"><a href="tel:${prospect.phone}">${prospect.phone}</a></div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${prospect.address ? `
+                                    <div class="detail-item">
+                                        <div class="detail-icon">📍</div>
+                                        <div class="detail-content">
+                                            <div class="detail-label">Adresse</div>
+                                            <div class="detail-value">${prospect.address}</div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${prospect.notes ? `
+                                    <div style="background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 8px;">
+                                        <div class="detail-label">Notes</div>
+                                        <div class="detail-value">${prospect.notes}</div>
+                                    </div>
+                                ` : ''}
+                                <div class="exchanges-section">
+                                    <div class="exchanges-title">💬 Échanges</div>
+                                    <div class="exchanges-list">
+                                        ${(!prospect.messages || prospect.messages.length === 0) ? 
+                                            '<div style="color: #64748b;">Aucun échange</div>' :
+                                            prospect.messages.map(msg => `
+                                                <div class="exchange-item">
+                                                    <div class="exchange-text">${msg.text}</div>
+                                                    <div class="exchange-time">${msg.date} ${msg.time}</div>
+                                                </div>
+                                            `).join('')
+                                        }
+                                    </div>
+                                    <div class="exchange-input">
+                                        <input type="text" placeholder="Note..." onkeypress="if(event.key==='Enter') { app.addMessage(${prospect.id}, this.value); this.value=''; }">
+                                        <button onclick="const inp = event.target.previousElementSibling; app.addMessage(${prospect.id}, inp.value); inp.value='';">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
